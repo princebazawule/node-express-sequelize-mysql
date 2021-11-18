@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
+require('dotenv').config()
 
 // create express app
 const app = express()
@@ -8,11 +9,10 @@ const app = express()
 // logging
 app.use(morgan("dev"))
 
+// use cors
 let corsOptions = {
   origin: 'http://localhoast:8081',
 }
-
-// use cors
 app.use(cors(corsOptions))
 
 // parse requests content-type: application/x-www-form-urlencoded
