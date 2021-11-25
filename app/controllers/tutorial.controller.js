@@ -2,6 +2,21 @@ const db = require('../models')
 const Tutorial = db.tutorials
 const Op = db.Sequelize.Op
 
+const getPagination = (page, size) => {
+  const limit = size ? +size : 3
+  const offset = page ? page * limit : 0
+
+  return { limit, offset }
+}
+
+const getPagingData = (data, page, limit) => {
+  const { count: totalItems, rows: tutorials } = data
+  const currentPage = page ? +page : 0
+  const totalPages = Math.ceil(totalItems / limit)
+
+  return { totalItems, tutorials, totalPages, currentPage }
+}
+
 // create and save new tutorial
 exports.create = (req, res) => {
   // validate request
@@ -34,12 +49,19 @@ exports.create = (req, res) => {
 
 // find all tutorials from db
 exports.findAll = (req, res) => {
-  const title = req.query.title
-  var condition = title ? { title: { [Op.like]: `%${title}%` } } : null
+  const { page, size, title } = req.query
+  let condition = title ? { title: { [Op.like]: `%${title}%` } } : null
 
-  Tutorial.findAll({ where: condition })
+  const { limit, offset } = getPagination(page, size);
+
+  Tutorial.findAndCountAll({
+    limit,
+    offset, 
+    where: condition,
+  })
     .then((data) => {
-      res.send(data)
+      const response = getPagingData(data, page, limit)
+      res.send(response)
     })
     .catch((err) => {
       res.status(500).send({
@@ -66,9 +88,24 @@ exports.findOne = (req, res) => {
 
 // find all published tutorials (condition)
 exports.findAllPublished = (req, res) => {
-  Tutorial.findAll({ where: { published: true } })
+  const { page, size, title } = req.query
+  let condition = title ? { title: { [Op.like]: `%${title}%` } } : null
+
+  const { limit, offset } = getPagination(page, size);
+
+  Tutorial.findAndCountAll({ 
+    where: { 
+      [Op.and]: [
+        condition,
+        {published: true}
+      ]
+    },
+    limit,
+    offset
+  })
     .then((data) => {
-      res.send(data)
+      const response = getPagingData(data, page, limit)
+      res.send(response)
     })
     .catch((err) => {
       res.status(500).send({

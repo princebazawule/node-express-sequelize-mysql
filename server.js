@@ -21,8 +21,11 @@ app.use(express.urlencoded({ extended: false }))
 // parse requests of content-type: application/json
 app.use(express.json())
 
+// connect mysql db
 const db = require('./app/models')
-db.sequelize.sync({ force: true }).then(() => {
+
+// db.sequelize.sync({ force: true }).then(() => {
+db.sequelize.sync().then(() => {
   console.log('Drop and re-sync db.')
 })
 
