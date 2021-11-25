@@ -49,7 +49,7 @@ exports.create = (req, res) => {
 
 // find all tutorials from db
 exports.findAll = (req, res) => {
-  const { page, size, title } = req.query
+  const { page, size, title, _order } = req.query
   let condition = title ? { title: { [Op.like]: `%${title}%` } } : null
 
   const { limit, offset } = getPagination(page, size);
@@ -58,6 +58,10 @@ exports.findAll = (req, res) => {
     limit,
     offset, 
     where: condition,
+    order: [
+      ['title', _order || 'ASC'],
+      ['createdAt', 'DESC'],
+    ],
   })
     .then((data) => {
       const response = getPagingData(data, page, limit)
@@ -88,7 +92,7 @@ exports.findOne = (req, res) => {
 
 // find all published tutorials (condition)
 exports.findAllPublished = (req, res) => {
-  const { page, size, title } = req.query
+  const { page, size, title, _order } = req.query
   let condition = title ? { title: { [Op.like]: `%${title}%` } } : null
 
   const { limit, offset } = getPagination(page, size);
@@ -101,7 +105,11 @@ exports.findAllPublished = (req, res) => {
       ]
     },
     limit,
-    offset
+    offset,
+    order: [
+      ['title', _order || 'ASC'],
+      ['createdAt', 'DESC'],
+    ],
   })
     .then((data) => {
       const response = getPagingData(data, page, limit)
